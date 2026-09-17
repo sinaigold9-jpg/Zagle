@@ -1,0 +1,8 @@
+plugins { id 'com.android.application' }
+
+android { namespace 'com.zajel.app'; compileSdk 35
+    defaultConfig { applicationId 'com.zajel.app'; minSdk 26; targetSdk 35; versionCode 11000; versionName '1.1.0.0' }
+    buildFeatures { buildConfig true }
+    buildTypes { debug { buildConfigField 'String', 'SUPABASE_URL', '"' + (project.findProperty('zajelSupabaseUrl') ?: '') + '"'; buildConfigField 'String', 'SUPABASE_ANON_KEY', '"' + (project.findProperty('zajelSupabaseAnonKey') ?: '') + '"' }
+        release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'; buildConfigField 'String', 'SUPABASE_URL', '"' + (project.findProperty('zajelSupabaseUrl') ?: '') + '"'; buildConfigField 'String', 'SUPABASE_ANON_KEY', '"' + (project.findProperty('zajelSupabaseAnonKey') ?: '') + '"' } }
+}
