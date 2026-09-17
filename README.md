@@ -1,32 +1,45 @@
-# Zajel — Phase 4 complete
+# Zajel — Supabase schema and native integration
 
-Native Android source only. This revision reviews and hardens phases 1–2, then implements exactly the two requested phases:
+This project keeps all Android UI and business logic native to Android. Any backend connection is isolated behind Supabase client boundaries and never embedded in views or screens.
 
-- Phase 3: text-message sending plus persisted message status (`SENT`, `DELIVERED`, `READ`) and status update API.
-- Phase 4: Android native document picker, local cache while uploading, real Supabase Storage upload through a replaceable repository boundary, attachment metadata, and cleanup of the temporary local copy after upload.
+## Database and Storage blueprint
 
-There are no WebViews, fake users, fake conversations, fake messages, or placeholder production data. Empty server results remain empty states.
+The Supabase project should include the following tables:
 
-## Review fixes included
-- Sign-in session token is encrypted with Android Keystore AES-GCM.
-- Supabase networking remains outside the UI layer and all network work is off the main thread.
-- The client accepts empty configuration honestly and reports configuration errors.
-- UI reads authenticated server data only.
+- profiles
+- conversations
+- conversation_members
+- messages
+- attachments
+- groups
+- group_members
+- rooms
+- room_members
+- room_messages
+- storage bucket: `zajel-media`
 
-## Required server schema and RLS
-Existing tables: `profiles`, `conversations`, `conversation_members`, `messages`.
+The `supabase/schema.sql` file contains the core CREATE TABLE statements and RLS policies for the app data model. It is intentionally generic and safe for a local project setup. No secrets are committed here.
 
-For this revision, `messages` should include `message_type` and `status` (`SENT`, `DELIVERED`, `READ`), and an `attachments` table should include `id`, `message_id`, `name`, `mime_type`, `storage_path`, and `size_bytes`. Configure RLS so a user may only read memberships/messages/attachments for conversations they belong to, insert their own messages, and update statuses according to your policy.
+## Required local build variables
 
-Create a private Storage bucket named `zajel-media` and matching Storage RLS policies. The app uploads only after authentication and never includes a service-role key. The storage adapter is isolated in `SupabaseClient`, so it can be replaced later by an independent provider without changing presentation/domain code.
-
-## Termux/Ubuntu build
-Use the locally installed SDK/Gradle setup; do not commit `local.properties`, credentials, keystores, or generated build output. Example:
+Run Gradle locally with the public values only:
 
 ```sh
-./gradlew assembleDebug -PzajelSupabaseUrl=https://YOUR_PROJECT.supabase.co -PzajelSupabaseAnonKey=YOUR_PUBLIC_ANON_KEY
+./gradlew assembleDebug \
+  -PzajelSupabaseUrl=https://YOUR_PROJECT.supabase.co \
+  -PzajelSupabaseAnonKey=YOUR_PUBLIC_ANON_KEY
 ```
 
-The source targets Java/JDK 17-compatible Android APIs and does not require Android Studio.
+Do not commit `local.properties`, keystores, service-role keys, or generated APK/AAB files.
 
-Development plan: 20 stages total; phases 1–4 are now complete, so 16 stages remain.
+## Phase coverage
+
+Phases completed in source as of this revision:
+- Phase 1: Accounts, users, profile, and settings
+- Phase 2: Home and direct/private chats
+- Phase 3: Text send and message status
+- Phase 4: Attachments, uploads, and local cache cleanup
+- Phase 5: Groups and member administration
+- Phase 8: Rooms and room messaging
+
+The project remains in a native Java Android architecture and the design remains compatible with Termux + Ubuntu ARM64 and JDK 17 tooling.
