@@ -1,0 +1,12 @@
+package com.zajel.app.data;
+
+import android.content.*;
+import com.zajel.app.domain.UserSession;
+
+public final class SecureSessionStore {
+    private final SharedPreferences p;
+    public SecureSessionStore(Context c){p=c.getSharedPreferences("zajel_session",Context.MODE_PRIVATE);}
+    public void save(UserSession s){p.edit().putString("token",s.accessToken).putString("id",s.userId).putString("email",s.email).apply();}
+    public UserSession read(){String t=p.getString("token",""); if(t.isEmpty())return null; return new UserSession(t,p.getString("id",""),p.getString("email",""));}
+    public void clear(){p.edit().clear().apply();}
+}

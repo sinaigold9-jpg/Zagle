@@ -1,0 +1,7 @@
+package com.zajel.app.data;
+
+import com.zajel.app.core.SupabaseClient; import com.zajel.app.domain.*; import java.util.concurrent.Executors; import org.json.*;
+public final class SupabaseProfileRepository implements ProfileRepository { private final SupabaseClient api; private final SecureSessionStore store; public SupabaseProfileRepository(SupabaseClient a,SecureSessionStore s){api=a;store=s;}
+ public void get(Callback<Profile> cb){run(false,null,null,null,cb);} public void update(String u,String d,String a,Callback<Profile> cb){run(true,u,d,a,cb);}
+ private void run(boolean write,String u,String d,String a,Callback<Profile> cb){Executors.newSingleThreadExecutor().execute(()->{try{UserSession s=store.read();if(s==null)throw new IllegalStateException("Not signed in");String path="/rest/v1/profiles?id=eq."+s.userId;JSONObject body=write?new JSONObject().put("username",u).put("display_name",d).put("avatar_url",a):null;JSONObject r=api.request(write?"PATCH":"GET",path,s.accessToken,body);JSONObject x=r.has("rows")?r.getJSONArray("rows").optJSONObject(0):r; if(x==null)throw new IllegalStateException("Profile not found");cb.success(new Profile(s.userId,x.optString("username"),x.optString("display_name"),x.optString("avatar_url")));}catch(Exception e){cb.error(e);}});}
+}

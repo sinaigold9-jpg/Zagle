@@ -1,0 +1,3 @@
+# Zajel secrets/configuration are supplied locally and are never committed.
+# Example when building locally:
+# ./gradlew assembleDebug -PzajelSupabaseUrl=https://your-project.supabase.co -PzajelSupabaseAnonKey=your-public-anon-key
