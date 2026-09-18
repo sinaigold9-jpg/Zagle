@@ -1,45 +1,26 @@
-# Zajel — Supabase schema and native integration
+# Zajel — Explore, Search, Suggestions, and Public Ads
 
-This project keeps all Android UI and business logic native to Android. Any backend connection is isolated behind Supabase client boundaries and never embedded in views or screens.
+Native Android Java source only. This revision implements exactly:
 
-## Database and Storage blueprint
+- Phase 9: Explore plus scalable public search for users, public groups, and public rooms.
+- Phase 10: public suggestions and public notices/ads, isolated from private chat data.
 
-The Supabase project should include the following tables:
+Search never queries private conversations or private messages. Suggestions and ads are read from explicit public tables only. Empty server results remain empty states; no fake data is generated.
 
-- profiles
-- conversations
-- conversation_members
-- messages
-- attachments
-- groups
-- group_members
-- rooms
-- room_members
-- room_messages
-- storage bucket: `zajel-media`
-
-The `supabase/schema.sql` file contains the core CREATE TABLE statements and RLS policies for the app data model. It is intentionally generic and safe for a local project setup. No secrets are committed here.
-
-## Required local build variables
-
-Run Gradle locally with the public values only:
+## Supabase schema
+Run `supabase/schema.sql` in the Supabase SQL editor. Keep the project URL and public anon key in local Gradle properties only:
 
 ```sh
-./gradlew assembleDebug \
-  -PzajelSupabaseUrl=https://YOUR_PROJECT.supabase.co \
-  -PzajelSupabaseAnonKey=YOUR_PUBLIC_ANON_KEY
+./gradlew assembleDebug -PzajelSupabaseUrl=https://YOUR_PROJECT.supabase.co -PzajelSupabaseAnonKey=YOUR_PUBLIC_ANON_KEY
 ```
 
-Do not commit `local.properties`, keystores, service-role keys, or generated APK/AAB files.
+No service-role keys, passwords, tokens, keystores, APKs, or AABs belong in this repository.
 
-## Phase coverage
+## Review notes
+- Authentication uses the existing explicit `signIn`/`signUp` contract.
+- Explore is behind a repository boundary and network work runs off the UI thread.
+- Public search is limited to public groups/rooms and profile fields intended for discovery.
+- Private chat, media, group, and room repositories remain separate from Explore.
+- The source remains compatible with Termux + Ubuntu ARM64 + JDK 17 and requires no Android Studio or WebView.
 
-Phases completed in source as of this revision:
-- Phase 1: Accounts, users, profile, and settings
-- Phase 2: Home and direct/private chats
-- Phase 3: Text send and message status
-- Phase 4: Attachments, uploads, and local cache cleanup
-- Phase 5: Groups and member administration
-- Phase 8: Rooms and room messaging
-
-The project remains in a native Java Android architecture and the design remains compatible with Termux + Ubuntu ARM64 and JDK 17 tooling.
+Completed stages: 1, 2, 3, 4, 5, 8, 9, 10. Remaining stages: 12 (6, 7, 11–20).
