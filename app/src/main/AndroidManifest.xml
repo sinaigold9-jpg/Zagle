@@ -8,6 +8,8 @@
         <activity android:name=".NotificationsActivity" android:exported="false" />
         <activity android:name=".NotificationSettingsActivity" android:exported="false" />
         <activity android:name=".ContactsActivity" android:exported="false" />
+        <activity android:name=".BackupActivity" android:exported="false" />
+        <activity android:name=".FileManagerActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
     </application>
 </manifest>

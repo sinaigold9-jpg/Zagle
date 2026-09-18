@@ -1,8 +1,8 @@
-# Zajel — phases 11 and 14
+# Zajel — phases 12 and 13
 
-Implemented natively in Java:
+Implemented directly in native Java:
 
-- Phase 11: notification list, Android notification channel, and user-controlled notification settings.
-- Phase 14: runtime-protected device contacts screen and native invitation sharing. Contacts are not uploaded to Supabase.
+- Phase 12: user-selected backup export/import through Android Storage Access Framework, compatible with Google Drive and other document providers. Backup selection is explicit and no offline automatic Drive sync is claimed.
+- Phase 13: local received-file manager with document picker, private app storage, listing, and native sharing.
 
-Run `supabase/phase11_phase14.sql` after the existing schema migrations. The application requests `READ_CONTACTS` only when the contacts screen is opened and requests no contact permission at startup. Notification delivery can be connected to the existing `notifications` table or a protected server-side event pipeline.
+Run `supabase/phase12_phase13.sql` after the previous Supabase migrations. The tables store backup preferences and file metadata only; the actual backup/file bytes remain in the user-selected provider or private device storage.

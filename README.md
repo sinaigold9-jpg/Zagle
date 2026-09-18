@@ -1,5 +1,5 @@
 # Zajel — implementation status
 
-Completed stages: 1, 2, 3, 4, 5, 8, 9, 10, 11, 14.
+Completed stages: 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14.
 
-Stage 11 provides native notifications and notification settings. Stage 14 provides on-device contacts access and native invitations without uploading the address book. Run the phase SQL migrations before testing server-backed notifications.
+Stages 12 and 13 add user-controlled backup/file handling without secrets, fake data, or WebView. Run `supabase/phase12_phase13.sql` after the existing migrations.
