@@ -1,16 +1,5 @@
 # Zajel — implementation status
 
-Completed stages: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17.
+Completed stages: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18.
 
-## المرحلتان 6 و7
-
-تم تنفيذ Channels وCommunities Native مع الحفاظ على Groups وRooms السابقة:
-
-- القنوات العامة والخاصة، إنشاء القناة، المتابعة، المنشورات، وصلاحيات النشر.
-- دعوات القنوات كرمز داخلي ديناميكي يتم توليده وحفظه في قاعدة البيانات.
-- الانضمام يتم من داخل التطبيق عبر رمز الدعوة؛ لا يوجد WebView ولا إعادة توجيه إلى رابط ويب.
-- Communities، إنشاؤها، عضويتها، وربطها بالمجموعات والقنوات عبر جداول علاقات مستقلة.
-- الواجهات Native Java، وتستخدم المستودعات وSupabase بدل بيانات وهمية.
-- المشاركة الداخلية مصممة كاستهداف لمعرف القناة/المجتمع داخل التطبيق، بدون URL. المشاركة الخارجية مؤجلة حتى تزويد رابطها ومتطلباتها.
-
-يجب تطبيق `supabase/phase6_phase7.sql` بعد المخطط الأساسي في مشروع Supabase. لا يحتوي المستودع على مفاتيح أو أسرار. لم يتم تغيير WebView أو معمارية ARM64 أو الوظائف السابقة.
+Stage 15 adds a native Privacy Center and Security Center for account privacy, session/device control, and per-user protection. Stage 18 adds architecture cleanup and removes noisy legacy patterns without altering the Native Android identity or introducing WebView.
