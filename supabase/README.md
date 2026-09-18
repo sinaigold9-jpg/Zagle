@@ -1,22 +1,26 @@
-## تنفيذ المرحلتين 19 و20 والتحقق
+# تصحيح الصفحات 9 و10 و11
 
-تم إكمال المرحلتين الأخيرتين:
+تم تصحيح وإضافة صفحات:
 
-- المرحلة 19: اختبارات أساسية لعقود الخصوصية والجلسات والتحقق من Native-only.
-- المرحلة 20: تجهيز Production، تصحيح dependency graph، وتوثيق بناء Debug/Release على Termux Ubuntu ARM64.
+- الصفحة 9: `ChannelsActivity` — القنوات العامة، إنشاء قناة، المتابعة، ونشر المنشور.
+- الصفحة 10: `CommunitiesActivity` — إنشاء المجتمعات وتحميل مجتمعات المستخدم.
+- الصفحة 11: `PrivacySecurityActivity` — إعدادات الخصوصية وإدارة الأجهزة والجلسات.
 
-تمت معالجة خلل توافق مهم في النسخة السابقة: كان ملف `AppContainer.java` يحتوي بالخطأ على كود شاشة `PrivacySecurityActivity`، كما كان مستودع `SupabaseSecurityRepository` غير موجود بمساره الصحيح. تمت استعادة AppContainer كـ composition root وإضافة المستودع بالمسار الصحيح.
+تم تسجيل الصفحات الثلاث في `AndroidManifest.xml`، وتصحيح خطأ حرج كان يجعل ملف `PrivacySecurityActivity.java` يحتوي على `SupabaseSecurityRepository` داخل package خاطئ. أصبح المستودع الآن في ملفه الصحيح، وأصبحت الشاشة Activity أصلية في package `com.zajel.app`.
 
-### الاختبار المحلي المطلوب
+تمت مراجعة نقاط التوافق الرئيسية:
 
-من جذر المشروع:
+- Native Android Java فقط.
+- عدم استخدام WebView أو إعادة توجيه ويب للمشاركة الداخلية.
+- استخدام `AppContainer` وRepositories بدل الوصول المباشر من الواجهة إلى الشبكة.
+- عدم إضافة Mock Data.
+- الاحتفاظ بدعم RTL وARM64 وSupabase configuration المحلي.
+
+شغّل من Ubuntu داخل Termux:
 
 ```bash
 export JAVA_HOME=/opt/jdk-17.0.20.1+1
 export ANDROID_HOME=/opt/android-sdk
 export ANDROID_SDK_ROOT=/opt/android-sdk
-./gradlew testDebugUnitTest assembleDebug
-./gradlew assembleRelease -PzajelSupabaseUrl=https://your-project.supabase.co -PzajelSupabaseAnonKey=your-public-anon-key
+./gradlew clean testDebugUnitTest assembleDebug
 ```
-
-يجب تزويد مفتاح Supabase العام محليًا فقط، وعدم وضعه في Git. توقيع Release يتم بواسطة Keystore خارجي. لا توجد WebView أو إعادة توجيه ويب، ولا توجد بيانات Mock داخل Production، ويحافظ التطبيق على Native Android وARM64.

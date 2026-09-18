@@ -1,154 +1,120 @@
-package com.zajel.app.data;
+package com.zajel.app;
 
-import com.zajel.app.core.AppExecutors;
-import com.zajel.app.core.SupabaseClient;
+import android.app.Activity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Switch;
+import android.widget.TextView;
+import com.zajel.app.core.AppContainer;
+import com.zajel.app.data.SecurityRepository;
 import com.zajel.app.domain.PrivacySettings;
 import com.zajel.app.domain.SessionDevice;
-import com.zajel.app.domain.UserSession;
-import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-public final class SupabaseSecurityRepository implements SecurityRepository {
-    private final SupabaseClient api;
-    private final SecureSessionStore sessions;
+/** Native Privacy Center and Security Center. */
+public final class PrivacySecurityActivity extends Activity {
+    private AppContainer container;
+    private LinearLayout root;
+    private Switch profileVisible, lastSeenVisible, readReceipts, contactsInvites, allowGroupInvites;
+    private TextView status;
 
-    public SupabaseSecurityRepository(SupabaseClient api, SecureSessionStore sessions) {
-        this.api = api;
-        this.sessions = sessions;
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        container = ((ZajelApplication) getApplication()).container();
+        render();
+        loadPrivacy();
+        loadSessions();
     }
 
-    @Override
-    public void privacySettings(final Callback<PrivacySettings> callback) {
-        AppExecutors.network().execute(() -> {
-            try {
-                UserSession user = required();
-                JSONObject response = api.request(
-                        "GET",
-                        "/rest/v1/privacy_settings?user_id=eq." + user.userId + "&select=user_id,profile_visible,last_seen_visible,read_receipts,contacts_invites,allow_group_invites",
-                        user.accessToken,
-                        null
-                );
-                JSONArray rows = response.optJSONArray("rows");
-                if (rows == null || rows.length() == 0) {
-                    callback.success(defaultPrivacySettings());
-                    return;
-                }
-                JSONObject row = rows.optJSONObject(0);
-                callback.success(new PrivacySettings(
-                        row.optBoolean("profile_visible", true),
-                        row.optBoolean("last_seen_visible", true),
-                        row.optBoolean("read_receipts", true),
-                        row.optBoolean("contacts_invites", true),
-                        row.optBoolean("allow_group_invites", true)
-                ));
-            } catch (Exception error) {
-                callback.error(error);
+    private void render() {
+        ScrollView scroll = new ScrollView(this);
+        root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(28, 48, 28, 28);
+        root.setBackgroundColor(Color.WHITE);
+        scroll.addView(root);
+        setContentView(scroll);
+
+        TextView title = text("Privacy & Security", 28);
+        title.setGravity(Gravity.RIGHT);
+        root.addView(title);
+        profileVisible = toggle("Profile visible in discovery");
+        lastSeenVisible = toggle("Show last seen");
+        readReceipts = toggle("Read receipts");
+        contactsInvites = toggle("Allow contact invitations");
+        allowGroupInvites = toggle("Allow group invitations");
+        root.addView(profileVisible); root.addView(lastSeenVisible); root.addView(readReceipts);
+        root.addView(contactsInvites); root.addView(allowGroupInvites);
+        Button save = new Button(this);
+        save.setText("Save privacy settings");
+        save.setOnClickListener(v -> savePrivacy());
+        root.addView(save);
+        status = text("Loading…", 15);
+        root.addView(status);
+    }
+
+    private void loadPrivacy() {
+        container.security.privacySettings(new SecurityRepository.Callback<PrivacySettings>() {
+            @Override public void success(PrivacySettings value) {
+                runOnUiThread(() -> {
+                    profileVisible.setChecked(value.profileVisible);
+                    lastSeenVisible.setChecked(value.lastSeenVisible);
+                    readReceipts.setChecked(value.readReceipts);
+                    contactsInvites.setChecked(value.contactsInvites);
+                    allowGroupInvites.setChecked(value.allowGroupInvites);
+                    status.setText("Privacy settings loaded");
+                });
             }
+            @Override public void error(Exception error) { runOnUiThread(() -> status.setText("Unable to load privacy settings")); }
         });
     }
 
-    @Override
-    public void updatePrivacySettings(final PrivacySettings settings, final Callback<Void> callback) {
-        AppExecutors.network().execute(() -> {
-            try {
-                UserSession user = required();
-                JSONObject payload = new JSONObject()
-                        .put("user_id", user.userId)
-                        .put("profile_visible", settings.profileVisible)
-                        .put("last_seen_visible", settings.lastSeenVisible)
-                        .put("read_receipts", settings.readReceipts)
-                        .put("contacts_invites", settings.contactsInvites)
-                        .put("allow_group_invites", settings.allowGroupInvites);
-                api.request("POST", "/rest/v1/privacy_settings?on_conflict=user_id", user.accessToken, payload);
-                callback.success(null);
-            } catch (Exception error) {
-                callback.error(error);
-            }
+    private void savePrivacy() {
+        status.setText("Saving settings…");
+        PrivacySettings value = new PrivacySettings(profileVisible.isChecked(), lastSeenVisible.isChecked(),
+                readReceipts.isChecked(), contactsInvites.isChecked(), allowGroupInvites.isChecked());
+        container.security.updatePrivacySettings(value, new SecurityRepository.Callback<Void>() {
+            @Override public void success(Void ignored) { runOnUiThread(() -> status.setText("Privacy settings saved")); }
+            @Override public void error(Exception error) { runOnUiThread(() -> status.setText("Could not save privacy settings")); }
         });
     }
 
-    @Override
-    public void sessions(final Callback<List<SessionDevice>> callback) {
-        AppExecutors.network().execute(() -> {
-            try {
-                UserSession user = required();
-                JSONObject response = api.request(
-                        "GET",
-                        "/rest/v1/device_sessions?user_id=eq." + user.userId + "&select=id,device_name,platform,last_seen_at,is_current,revoked&order=last_seen_at.desc",
-                        user.accessToken,
-                        null
-                );
-                JSONArray rows = response.optJSONArray("rows");
-                List<SessionDevice> out = new ArrayList<>();
-                if (rows != null) {
-                    for (int i = 0; i < rows.length(); i++) {
-                        JSONObject row = rows.optJSONObject(i);
-                        if (row == null) continue;
-                        out.add(new SessionDevice(
-                                row.optString("id"),
-                                row.optString("device_name"),
-                                row.optString("platform"),
-                                row.optString("last_seen_at"),
-                                row.optBoolean("is_current", false),
-                                row.optBoolean("revoked", false)
-                        ));
+    private void loadSessions() {
+        container.security.sessions(new SecurityRepository.Callback<List<SessionDevice>>() {
+            @Override public void success(List<SessionDevice> values) {
+                runOnUiThread(() -> {
+                    TextView heading = text("Connected devices", 19);
+                    heading.setPadding(0, 24, 0, 8);
+                    root.addView(heading);
+                    if (values == null || values.isEmpty()) { root.addView(text("No active sessions", 15)); return; }
+                    for (SessionDevice value : values) {
+                        TextView row = text((value.current ? "Current • " : "") + value.deviceName + " • " + value.platform
+                                + "\nLast seen: " + value.lastSeenAt, 15);
+                        row.setPadding(0, 8, 0, 8); root.addView(row);
+                        if (!value.current && !value.revoked) {
+                            Button revoke = new Button(PrivacySecurityActivity.this);
+                            revoke.setText("Revoke");
+                            revoke.setOnClickListener(v -> revoke(value.id));
+                            root.addView(revoke);
+                        }
                     }
-                }
-                callback.success(out);
-            } catch (Exception error) {
-                callback.error(error);
+                });
             }
+            @Override public void error(Exception error) { runOnUiThread(() -> status.setText("Sessions unavailable")); }
         });
     }
 
-    @Override
-    public void revokeSession(final String sessionId, final Callback<Void> callback) {
-        AppExecutors.network().execute(() -> {
-            try {
-                UserSession user = required();
-                JSONObject payload = new JSONObject().put("revoked", true).put("is_current", false);
-                api.request(
-                        "PATCH",
-                        "/rest/v1/device_sessions?id=eq." + sessionId + "&user_id=eq." + user.userId,
-                        user.accessToken,
-                        payload
-                );
-                callback.success(null);
-            } catch (Exception error) {
-                callback.error(error);
-            }
+    private void revoke(String sessionId) {
+        container.security.revokeSession(sessionId, new SecurityRepository.Callback<Void>() {
+            @Override public void success(Void ignored) { runOnUiThread(() -> status.setText("Device revoked")); loadSessions(); }
+            @Override public void error(Exception error) { runOnUiThread(() -> status.setText("Could not revoke device")); }
         });
     }
 
-    @Override
-    public void currentSession(final Callback<SessionDevice> callback) {
-        sessions(new Callback<List<SessionDevice>>() {
-            @Override public void success(List<SessionDevice> value) {
-                SessionDevice current = null;
-                for (SessionDevice session : value) {
-                    if (session.current && !session.revoked) {
-                        current = session;
-                        break;
-                    }
-                }
-                callback.success(current);
-            }
-
-            @Override public void error(Exception error) {
-                callback.error(error);
-            }
-        });
-    }
-
-    private UserSession required() {
-        UserSession current = sessions.read();
-        if (current == null) throw new IllegalStateException("Not signed in");
-        return current;
-    }
-
-    private PrivacySettings defaultPrivacySettings() {
-        return new PrivacySettings(true, true, true, true, true);
-    }
+    private Switch toggle(String label) { Switch value = new Switch(this); value.setText(label); value.setTextSize(16); value.setPadding(0, 10, 0, 10); return value; }
+    private TextView text(String value, int size) { TextView view = new TextView(this); view.setText(value); view.setTextSize(size); view.setTextColor(Color.rgb(24, 45, 61)); view.setGravity(Gravity.RIGHT); return view; }
 }

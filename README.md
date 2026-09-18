@@ -2,20 +2,21 @@
 
 Completed stages: 1 through 20.
 
-## Validation status
+## Current integrity fixes
 
-Stages 19 and 20 add lightweight domain checks, Native-only architecture validation, release configuration guidance, and a corrected dependency graph. The repository is Android Native Java with no WebView source or mock production data.
+- `ChannelsActivity`, `CommunitiesActivity`, and `PrivacySecurityActivity` are valid Native Android Activities and are registered in `AndroidManifest.xml`.
+- The privacy/security screen is now in package `com.zajel.app`; repository code remains in `com.zajel.app.data`.
+- Channel and Community screens use repository-backed server data only. No WebView, web redirect, or mock production data was added.
+- `AppContainer` remains the single dependency composition root.
 
-### Termux/Ubuntu verification
-
-From Ubuntu ARM64 in Termux:
+## Termux/Ubuntu verification
 
 ```bash
 export JAVA_HOME=/opt/jdk-17.0.20.1+1
 export ANDROID_HOME=/opt/android-sdk
 export ANDROID_SDK_ROOT=/opt/android-sdk
-./gradlew testDebugUnitTest assembleDebug
+./gradlew clean testDebugUnitTest assembleDebug
 ./gradlew assembleRelease -PzajelSupabaseUrl=https://your-project.supabase.co -PzajelSupabaseAnonKey=your-public-anon-key
 ```
 
-If a Gradle wrapper is not present, install/use a compatible Gradle 8.7+ binary or add the wrapper with the Android SDK environment available. Secrets and signing files remain outside Git.
+The Supabase URL and public anonymous key are supplied locally. Keystore/signing files remain outside GitHub.
