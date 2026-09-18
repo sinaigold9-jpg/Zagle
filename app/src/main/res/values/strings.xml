@@ -1,1 +1,7 @@
-<resources><string name="app_name">Zajel</string></resources>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zajel</string>
+    <string name="content_description_loading">Loading</string>
+    <string name="content_description_back">Back</string>
+    <string name="network_offline">No internet connection</string>
+</resources>

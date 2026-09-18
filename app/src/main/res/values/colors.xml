@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="zajel_ink">#182D3D</color>
+    <color name="zajel_muted">#5B6C79</color>
+    <color name="zajel_surface">#F7F9FC</color>
+    <color name="zajel_accent">#276C7A</color>
+</resources>

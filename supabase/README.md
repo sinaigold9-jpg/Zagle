@@ -1,8 +1,17 @@
-# Zajel — phases 12 and 13
+# تحديث المرحلتين 16 و17
 
-Implemented directly in native Java:
+تمت إضافة طبقة أداء صغيرة وغير مدمرة تشمل:
 
-- Phase 12: user-selected backup export/import through Android Storage Access Framework, compatible with Google Drive and other document providers. Backup selection is explicit and no offline automatic Drive sync is claimed.
-- Phase 13: local received-file manager with document picker, private app storage, listing, and native sharing.
+- `AppExecutors`: مجمع محدود لخيوط الأعمال بدل إنشاء خيوط غير محدودة.
+- `NetworkStatus`: فحص اتصال Android قبل العمليات الحساسة.
+- `BoundedMemoryCache`: Cache محدود الحجم لمنع تسرب الذاكرة.
 
-Run `supabase/phase12_phase13.sql` after the previous Supabase migrations. The tables store backup preferences and file metadata only; the actual backup/file bytes remain in the user-selected provider or private device storage.
+وتمت إضافة تحسينات Native للواجهة:
+
+- موارد ألوان وأبعاد موحدة.
+- دعم `values-ar` للغة العربية.
+- `android:supportsRtl="true"`.
+- أدوات `NativeUi` و`AccessibleTextView` لاتجاه اللغة، الوصف الصوتي، وحجم النص.
+- تحسينات الألوان وStatus Bar وNavigation Bar مع الحفاظ على الواجهات الحالية وعدم استخدام WebView.
+
+لم تتم إضافة جداول Supabase لأن المرحلتين 16 و17 لا تتطلبان تغييرًا في مخطط قاعدة البيانات.

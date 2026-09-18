@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">زاجل</string>
+    <string name="content_description_loading">جارٍ التحميل</string>
+    <string name="content_description_back">رجوع</string>
+    <string name="network_offline">لا يوجد اتصال بالإنترنت</string>
+</resources>

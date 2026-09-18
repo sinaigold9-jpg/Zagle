@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="zajel_page_horizontal">24dp</dimen>
+    <dimen name="zajel_page_vertical">32dp</dimen>
+    <dimen name="zajel_control_min_height">52dp</dimen>
+    <dimen name="zajel_text_spacing">8dp</dimen>
+</resources>
