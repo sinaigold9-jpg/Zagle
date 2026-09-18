@@ -1,7 +1,8 @@
-# Explore and public content setup
+# Zajel — phases 11 and 14
 
-Run `schema.sql`, then `explore.sql` in Supabase. This migration adds the explicit `profiles.is_discoverable` privacy flag, public suggestions, and public ads.
+Implemented natively in Java:
 
-The Android app queries only public groups, public rooms, profiles explicitly marked discoverable, reviewed suggestions, and enabled public ads. It never queries private conversations or messages for Explore.
+- Phase 11: notification list, Android notification channel, and user-controlled notification settings.
+- Phase 14: runtime-protected device contacts screen and native invitation sharing. Contacts are not uploaded to Supabase.
 
-Do not add fake rows for production. Curate `explore_suggestions` and `public_ads` through the Supabase dashboard or a protected server-side process. Never expose a service-role key in Android or GitHub.
+Run `supabase/phase11_phase14.sql` after the existing schema migrations. The application requests `READ_CONTACTS` only when the contacts screen is opened and requests no contact permission at startup. Notification delivery can be connected to the existing `notifications` table or a protected server-side event pipeline.
