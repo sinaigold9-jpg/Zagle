@@ -1,0 +1,4 @@
+-- Phase 19 + 20 support notes. No secrets or mock rows.
+-- The existing schema and phase migrations remain the source of truth.
+-- Phase 19 domain checks are JVM-side; Supabase security policies remain in phase15_phase18.sql.
+-- Release signing must be supplied locally and must never be committed.

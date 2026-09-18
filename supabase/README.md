@@ -1,25 +1,22 @@
-# تحديث المرحلتين 15 و18
+## تنفيذ المرحلتين 19 و20 والتحقق
 
-## المرحلة 15 — Privacy Center + Security Center
+تم إكمال المرحلتين الأخيرتين:
 
-تمت إضافة:
+- المرحلة 19: اختبارات أساسية لعقود الخصوصية والجلسات والتحقق من Native-only.
+- المرحلة 20: تجهيز Production، تصحيح dependency graph، وتوثيق بناء Debug/Release على Termux Ubuntu ARM64.
 
-- `PrivacySettings`: إعدادات الخصوصية الأساسية للمستخدم.
-- `SecurityRepository` + `SupabaseSecurityRepository`: لإدارة الخصوصية والمواقع النشطة والجلسات.
-- `PrivacySecurityActivity`: شاشة Native من Android لتعديل الخصوصية وإدارة الأجهزة المسجلة.
-- `device_sessions`: جدول الجلسات والأجهزة، مع إمكانية إبطال جلسة معينة.
-- `privacy_settings`: إعدادات الخصوصية الفردية لكل مستخدم.
+تمت معالجة خلل توافق مهم في النسخة السابقة: كان ملف `AppContainer.java` يحتوي بالخطأ على كود شاشة `PrivacySecurityActivity`، كما كان مستودع `SupabaseSecurityRepository` غير موجود بمساره الصحيح. تمت استعادة AppContainer كـ composition root وإضافة المستودع بالمسار الصحيح.
 
-تم الالتزام بعدم إنشاء WebView أو إعادة توجيه إلى رابط ويب. كل شيء يبقى داخل التطبيق Native.
+### الاختبار المحلي المطلوب
 
-## المرحلة 18 — Architecture + cleanup
+من جذر المشروع:
 
-تمت إضافة بنية أكثر وضوحًا من خلال:
+```bash
+export JAVA_HOME=/opt/jdk-17.0.20.1+1
+export ANDROID_HOME=/opt/android-sdk
+export ANDROID_SDK_ROOT=/opt/android-sdk
+./gradlew testDebugUnitTest assembleDebug
+./gradlew assembleRelease -PzajelSupabaseUrl=https://your-project.supabase.co -PzajelSupabaseAnonKey=your-public-anon-key
+```
 
-- فصل إدارة الجلسات والخصوصية عن الواجهة.
-- الاحتفاظ بجميع عمليات قاعدة البيانات دا��ل repositories.
-- تقسيم البيانات وفق الواجهات والكيانات المناسبة.
-- تنظيف `AppContainer` لتحميل جميع المستودعات بشكل منظم.
-- عدم إدخال Mock data أو أكواد تصحيح/Debug داخل Production.
-
-لم تتم إضافة جداول جديدة خارج ما يلزم لتغطية Privacy/Security، ولم يتم تغيير البنية الأصلية Native/ARM64.
+يجب تزويد مفتاح Supabase العام محليًا فقط، وعدم وضعه في Git. توقيع Release يتم بواسطة Keystore خارجي. لا توجد WebView أو إعادة توجيه ويب، ولا توجد بيانات Mock داخل Production، ويحافظ التطبيق على Native Android وARM64.
