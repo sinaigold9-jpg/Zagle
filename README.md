@@ -1,9 +1,7 @@
-# Zajel — Explore, Search, Suggestions, and Public Ads
+# Zajel — Native authentication
 
-Native Android Java implementation of phases 9 and 10:
+The launcher now opens a native Arabic-friendly authentication screen. Registration requires a first name, family name, email or phone number, password, and matching password confirmation. Existing users can sign in with the same email or phone method they selected at registration.
 
-- Explore and scalable public search for discoverable users, public groups, and public rooms.
-- Reviewed public suggestions and enabled public notices/ads.
-- Strict separation from private conversations and messages.
+Run `supabase/schema.sql`, then `supabase/auth_profile.sql`, then `supabase/explore.sql`. Supabase email/phone confirmation settings remain controlled by the Supabase project dashboard.
 
-Run `supabase/schema.sql` and then `supabase/explore.sql`. Empty server results remain empty states; the app does not generate fake content.
+No passwords, tokens, service-role keys, or fake accounts are stored in the repository.

@@ -1,12 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <application android:name=".ZajelApplication" android:theme="@style/AppTheme" android:label="Zajel">
-        <activity android:name=".ExploreActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".AuthActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ExploreActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
     </application>
 </manifest>
