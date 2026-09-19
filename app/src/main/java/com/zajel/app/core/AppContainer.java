@@ -29,33 +29,18 @@ import com.zajel.app.data.SupabaseSecurityRepository;
 
 /** Single composition root for the Native Android application. */
 public final class AppContainer {
-    public final AuthRepository auth;
-    public final ProfileRepository profiles;
-    public final ChatRepository chats;
-    public final GroupRepository groups;
-    public final RoomRepository rooms;
-    public final ExploreRepository explore;
-    public final NotificationRepository notifications;
-    public final ContactsRepository contacts;
-    public final ChannelRepository channels;
-    public final CommunityRepository communities;
-    public final SecurityRepository security;
-
+    public final AuthRepository auth; public final ProfileRepository profiles; public final ChatRepository chats;
+    public final GroupRepository groups; public final RoomRepository rooms; public final ExploreRepository explore;
+    public final NotificationRepository notifications; public final ContactsRepository contacts;
+    public final ChannelRepository channels; public final CommunityRepository communities; public final SecurityRepository security;
     public AppContainer(Context context) {
-        Context app = context.getApplicationContext();
-        SecureSessionStore sessionStore = new SecureSessionStore(app);
-        SupabaseClient api = new SupabaseClient();
-        MediaStorageRepository mediaStorage = new SupabaseMediaStorageRepository(api);
-        auth = new SupabaseAuthRepository(api, sessionStore);
-        profiles = new SupabaseProfileRepository(api, sessionStore);
-        chats = new SupabaseChatRepository(app, api, sessionStore, mediaStorage);
-        groups = new SupabaseGroupRepository(api, sessionStore);
-        rooms = new SupabaseRoomRepository(api, sessionStore);
-        explore = new SupabaseExploreRepository(api, sessionStore);
-        notifications = new SupabaseNotificationRepository(api, sessionStore);
-        contacts = new AndroidContactsRepository(app);
-        channels = new SupabaseChannelRepository(api, sessionStore);
-        communities = new SupabaseCommunityRepository(api, sessionStore);
+        Context app = context.getApplicationContext(); SecureSessionStore sessionStore = new SecureSessionStore(app);
+        SupabaseClient api = new SupabaseClient(app); MediaStorageRepository mediaStorage = new SupabaseMediaStorageRepository(api);
+        auth = new SupabaseAuthRepository(api, sessionStore); profiles = new SupabaseProfileRepository(api, sessionStore);
+        chats = new SupabaseChatRepository(app, api, sessionStore, mediaStorage); groups = new SupabaseGroupRepository(api, sessionStore);
+        rooms = new SupabaseRoomRepository(api, sessionStore); explore = new SupabaseExploreRepository(api, sessionStore);
+        notifications = new SupabaseNotificationRepository(api, sessionStore); contacts = new AndroidContactsRepository(app);
+        channels = new SupabaseChannelRepository(api, sessionStore); communities = new SupabaseCommunityRepository(api, sessionStore);
         security = new SupabaseSecurityRepository(api, sessionStore);
     }
 }

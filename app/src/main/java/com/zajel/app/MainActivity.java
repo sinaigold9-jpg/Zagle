@@ -1,19 +1,56 @@
 package com.zajel.app;
 
-import android.app.*;import android.graphics.Color;import android.os.Bundle;import android.text.InputType;import android.widget.*;import com.zajel.app.core.AppContainer;import com.zajel.app.data.*;import com.zajel.app.domain.*;import java.util.List;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+/** Home screen and navigation hub. Feature implementations live in their own activities. */
 public final class MainActivity extends Activity {
- private LinearLayout root; private EditText email,password; private AppContainer c; private TextView status;
- public void onCreate(Bundle b){super.onCreate(b);c=((ZajelApplication)getApplication()).container();if(c.auth.current()!=null)showHome();else showAuth();}
- private TextView title(String s){TextView v=new TextView(this);v.setText(s);v.setTextSize(26);v.setTextColor(Color.rgb(24,45,61));v.setPadding(0,0,0,24);return v;}
- private void base(){root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(40,70,40,30);root.setBackgroundColor(Color.WHITE);setContentView(root);}
- private Button button(String text){Button b=new Button(this);b.setText(text);return b;}
- private void showAuth(){base();root.addView(title("Zajel"));email=new EditText(this);email.setHint("Email");password=new EditText(this);password.setHint("Password");password.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);root.addView(email);root.addView(password);Button in=button("Sign in"),up=button("Create account");root.addView(in);root.addView(up);status=new TextView(this);root.addView(status);in.setOnClickListener(v->auth(false));up.setOnClickListener(v->auth(true));}
- private void auth(boolean up){status.setText("Connecting…");AuthRepository.Callback<UserSession> cb=new AuthRepository.Callback<UserSession>(){public void success(UserSession s){runOnUiThread(()->showHome());}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}};if(up)c.auth.signUp(email.getText().toString().trim(),password.getText().toString(),cb);else c.auth.signIn(email.getText().toString().trim(),password.getText().toString(),cb);}
- private void showHome(){base();root.addView(title("Home"));root.addView(new TextView(this){{setText("Your conversations");}});ListView list=new ListView(this);root.addView(list,new LinearLayout.LayoutParams(-1,0,1));status=new TextView(this);root.addView(status);Button explore=button("Explore"),groups=button("Groups"),rooms=button("Rooms"),profile=button("Profile");root.addView(explore);root.addView(groups);root.addView(rooms);root.addView(profile);explore.setOnClickListener(v->showExplore());groups.setOnClickListener(v->showGroups());rooms.setOnClickListener(v->showRooms());profile.setOnClickListener(v->showProfile());c.chats.conversations(new ChatRepository.Callback<List<Conversation>>(){public void success(List<Conversation> x){runOnUiThread(()->{status.setText(x.isEmpty()?"No conversations yet":"");String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).title;list.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));list.setOnItemClickListener((p,v,pos,id)->showChat(x.get(pos)));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});}
- private void showExplore(){base();root.addView(title("Explore"));EditText q=new EditText(this);q.setHint("Search public users, groups, rooms");Button search=button("Search");root.addView(q);root.addView(search);ListView list=new ListView(this);root.addView(list,new LinearLayout.LayoutParams(-1,0,1));status=new TextView(this);root.addView(status);Button suggestions=button("Public suggestions");Button ads=button("Public notices");Button back=button("Back");root.addView(suggestions);root.addView(ads);root.addView(back);back.setOnClickListener(v->showHome());search.setOnClickListener(v->{String text=q.getText().toString().trim();if(text.isEmpty()){status.setText("Enter a search term");return;}status.setText("Searching…");c.explore.search(text,new ExploreRepository.Callback<List<ExploreItem>>(){public void success(List<ExploreItem> x){runOnUiThread(()->{status.setText(x.isEmpty()?"No public results":"");String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).type+": "+x.get(i).title;list.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});});suggestions.setOnClickListener(v->c.explore.suggestions(new ExploreRepository.Callback<List<PublicSuggestion>>(){public void success(List<PublicSuggestion> x){runOnUiThread(()->{String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).title+" — "+x.get(i).reason;list.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}}));ads.setOnClickListener(v->c.explore.publicAds(new ExploreRepository.Callback<List<PublicAd>>(){public void success(List<PublicAd> x){runOnUiThread(()->{String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).title+"\n"+x.get(i).body;list.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}}));}
- private void showChat(Conversation x){base();root.addView(title(x.title));ListView messages=new ListView(this);root.addView(messages,new LinearLayout.LayoutParams(-1,0,1));EditText input=new EditText(this);input.setHint("Message");Button send=button("Send"),back=button("Back");root.addView(input);root.addView(send);root.addView(back);status=new TextView(this);root.addView(status);back.setOnClickListener(v->showHome());send.setOnClickListener(v->{String s=input.getText().toString().trim();if(s.isEmpty())return;c.chats.sendText(x.id,s,new ChatRepository.Callback<Message>(){public void success(Message m){runOnUiThread(()->{input.setText("");loadMessages(messages,x.id);});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});});loadMessages(messages,x.id);}
- private void loadMessages(ListView l,String id){c.chats.messages(id,new ChatRepository.Callback<List<Message>>(){public void success(List<Message> x){runOnUiThread(()->{String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).body;l.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});}
- private void showGroups(){base();root.addView(title("Groups"));ListView l=new ListView(this);root.addView(l,new LinearLayout.LayoutParams(-1,0,1));status=new TextView(this);root.addView(status);Button create=button("Create group"),back=button("Back");root.addView(create);root.addView(back);back.setOnClickListener(v->showHome());create.setOnClickListener(v->{EditText t=new EditText(this);t.setHint("Group title");new AlertDialog.Builder(this).setTitle("New group").setView(t).setPositiveButton("Create",(d,w)->c.groups.createGroup(t.getText().toString().trim(),"","",false,new GroupRepository.Callback<Group>(){public void success(Group g){runOnUiThread(()->showGroups());}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}})).setNegativeButton("Cancel",null).show();});c.groups.myGroups(new GroupRepository.Callback<List<Group>>(){public void success(List<Group> x){runOnUiThread(()->{status.setText(x.isEmpty()?"No groups yet":"");String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).title;l.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});}
- private void showRooms(){base();root.addView(title("Rooms"));ListView l=new ListView(this);root.addView(l,new LinearLayout.LayoutParams(-1,0,1));status=new TextView(this);root.addView(status);Button create=button("Create room"),back=button("Back");root.addView(create);root.addView(back);back.setOnClickListener(v->showHome());create.setOnClickListener(v->{EditText t=new EditText(this);t.setHint("Room title");new AlertDialog.Builder(this).setTitle("New room").setView(t).setPositiveButton("Create",(d,w)->c.rooms.createRoom(t.getText().toString().trim(),"",false,new RoomRepository.Callback<Room>(){public void success(Room r){runOnUiThread(()->showRooms());}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}})).setNegativeButton("Cancel",null).show();});c.rooms.myRooms(new RoomRepository.Callback<List<Room>>(){public void success(List<Room> x){runOnUiThread(()->{status.setText(x.isEmpty()?"No rooms yet":"");String[] a=new String[x.size()];for(int i=0;i<x.size();i++)a[i]=x.get(i).title;l.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,a));});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});}
- private void showProfile(){base();root.addView(title("Profile"));EditText u=new EditText(this);u.setHint("Username");EditText n=new EditText(this);n.setHint("Display name");root.addView(u);root.addView(n);Button save=button("Save"),back=button("Back"),out=button("Sign out");root.addView(save);root.addView(back);root.addView(out);status=new TextView(this);root.addView(status);c.profiles.get(new ProfileRepository.Callback<Profile>(){public void success(Profile p){runOnUiThread(()->{u.setText(p.username);n.setText(p.displayName);});}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}});save.setOnClickListener(v->c.profiles.update(u.getText().toString(),n.getText().toString(),"",new ProfileRepository.Callback<Profile>(){public void success(Profile p){runOnUiThread(()->status.setText("Profile saved"));}public void error(Exception e){runOnUiThread(()->status.setText(e.getMessage()));}}));back.setOnClickListener(v->showHome());out.setOnClickListener(v->{c.auth.signOut();showAuth();});}
+    private LinearLayout root;
+
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        if (((ZajelApplication) getApplication()).container().auth.current() == null) {
+            startActivity(new Intent(this, AuthActivity.class));
+            finish();
+            return;
+        }
+        showHome();
+    }
+
+    private void showHome() {
+        root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(40, 70, 40, 30);
+        root.setBackgroundColor(Color.WHITE);
+        setContentView(root);
+
+        TextView title = new TextView(this);
+        title.setText("Zajel\nHome");
+        title.setTextSize(26);
+        title.setTextColor(Color.rgb(24, 45, 61));
+        title.setPadding(0, 0, 0, 24);
+        root.addView(title);
+
+        addNavigation("Explore", ExploreActivity.class);
+        addNavigation("Contacts", ContactsActivity.class);
+        addNavigation("Notifications", NotificationsActivity.class);
+        addNavigation("Channels", ChannelsActivity.class);
+        addNavigation("Communities", CommunitiesActivity.class);
+        addNavigation("Privacy & Security", PrivacySecurityActivity.class);
+        addNavigation("Backup", BackupActivity.class);
+        addNavigation("File manager", FileManagerActivity.class);
+    }
+
+    private void addNavigation(String label, Class<? extends Activity> destination) {
+        Button button = new Button(this);
+        button.setText(label);
+        button.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, destination)));
+        root.addView(button, new LinearLayout.LayoutParams(-1, -2));
+    }
 }
