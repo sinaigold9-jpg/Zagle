@@ -1,8 +1,11 @@
 plugins { id 'com.android.application' }
 
-android { namespace 'com.zajel.app'; compileSdk 35
-    defaultConfig { applicationId 'com.zajel.app'; minSdk 26; targetSdk 35; versionCode 11000; versionName '1.1.0.0' }
+android { namespace 'com.zajel.app'; compileSdk 33
+    defaultConfig { applicationId 'com.zajel.app'; minSdk 26; targetSdk 33; versionCode 11000; versionName '1.1.0.0' }
     buildFeatures { buildConfig true }
     buildTypes { debug { buildConfigField 'String', 'SUPABASE_URL', '"' + (project.findProperty('zajelSupabaseUrl') ?: '') + '"'; buildConfigField 'String', 'SUPABASE_ANON_KEY', '"' + (project.findProperty('zajelSupabaseAnonKey') ?: '') + '"' }
-        release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'; buildConfigField 'String', 'SUPABASE_URL', '"' + (project.findProperty('zajelSupabaseUrl') ?: '') + '"'; buildConfigField 'String', 'SUPABASE_ANON_KEY', '"' + (project.findProperty('zajelSupabaseAnonKey') ?: '') + '"' } }
+        release { minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'; buildConfigField 'String', 'SUPABASE_URL', '"' + (project.findProperty('zajelSupabaseUrl') ?: '') + '"'; buildConfigField 'String', 'SUPABASE_ANON_KEY', '"' + (project.findProperty('zajelSupabaseAnonKey') ?: '') + '"' }
+    }
 }
+
+dependencies { implementation 'androidx.appcompat:appcompat:1.7.0'; implementation 'androidx.core:core:1.13.1'; implementation 'androidx.recyclerview:recyclerview:1.3.2'; implementation 'com.google.android.material:material:1.12.0'; implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0' }
