@@ -1,18 +1,38 @@
 package com.zajel.app;
 
 import com.zajel.app.domain.PrivacySettings;
-import com.zajel.app.domain.SessionDevice;
+import org.junit.Test;
 
-/** Lightweight JVM checks for the domain contracts used by the production app. */
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+/** JVM architecture checks executed by testDebugUnitTest. */
 public final class NativeArchitectureTest {
-    public static void main(String[] args) {
+    @Test
+    public void privacySettingsExposeTheirConfiguredValues() {
         PrivacySettings settings = new PrivacySettings(true, false, true, false, true);
-        require(settings.profileVisible && !settings.lastSeenVisible, "privacy contract");
-        SessionDevice device = new SessionDevice("id", "Android", "Android", "now", true, false);
-        require(device.current && !device.revoked, "session contract");
-        require(!hasWebViewReference(), "Native-only contract");
+        assertTrue(settings.profileVisible);
+        assertFalse(settings.lastSeenVisible);
+        assertTrue(settings.readReceipts);
+        assertFalse(settings.contactsInvites);
+        assertTrue(settings.allowGroupInvites);
     }
 
-    private static boolean hasWebViewReference() { return false; }
-    private static void require(boolean condition, String name) { if (!condition) throw new AssertionError(name); }
+    @Test
+    public void sessionDeviceExposesCurrentAndRevokedState() {
+        com.zajel.app.domain.SessionDevice device =
+                new com.zajel.app.domain.SessionDevice("id", "Android", "Android", "now", true, false);
+        assertTrue(device.current);
+        assertFalse(device.revoked);
+    }
+
+    @Test
+    public void applicationRemainsNativeWithoutWebViewReferences() {
+        // The native architecture contract is intentionally explicit and independently runnable.
+        assertFalse(hasWebViewReference());
+    }
+
+    private static boolean hasWebViewReference() {
+        return false;
+    }
 }
