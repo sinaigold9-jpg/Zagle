@@ -32,16 +32,20 @@ alter table privacy_settings enable row level security;
 alter table device_sessions enable row level security;
 alter table security_events enable row level security;
 
-create policy if not exists privacy_settings_owner on privacy_settings
+drop policy if exists "privacy_settings_owner" on privacy_settings;
+create policy "privacy_settings_owner" on privacy_settings
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-create policy if not exists device_sessions_owner_select on device_sessions
+drop policy if exists "device_sessions_owner_select" on device_sessions;
+create policy "device_sessions_owner_select" on device_sessions
   for select using (auth.uid() = user_id);
 
-create policy if not exists device_sessions_owner_update on device_sessions
+drop policy if exists "device_sessions_owner_update" on device_sessions;
+create policy "device_sessions_owner_update" on device_sessions
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-create policy if not exists security_events_owner on security_events
+drop policy if exists "security_events_owner" on security_events;
+create policy "security_events_owner" on security_events
   for insert with check (auth.uid() = user_id);
 
 create index if not exists device_sessions_user_last_seen_idx on device_sessions(user_id, last_seen_at desc);
