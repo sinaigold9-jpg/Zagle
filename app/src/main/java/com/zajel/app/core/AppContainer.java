@@ -45,7 +45,7 @@ public final class AppContainer {
         SupabaseClient api = new SupabaseClient();
         auth = new SupabaseAuthRepository(api, sessionStore);
         profiles = new SupabaseProfileRepository(api, sessionStore);
-        chats = new SupabaseChatRepository(api, sessionStore);
+        chats = new SupabaseChatRepository(context, api, sessionStore);
         groups = new SupabaseGroupRepository(api, sessionStore);
         rooms = new SupabaseRoomRepository(api, sessionStore);
         explore = new SupabaseExploreRepository(api, sessionStore);
