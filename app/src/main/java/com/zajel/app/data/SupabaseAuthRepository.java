@@ -58,7 +58,7 @@ public final class SupabaseAuthRepository implements AuthRepository {
 
     @Override public void signOut() { store.clear(); }
 
-    private UserSession save(UserSession session) { if (session != null) store.write(session); return session; }
+    private UserSession save(UserSession session) { if (session != null) store.save(session); return session; }
 
     private UserSession session(JSONObject response) {
         JSONObject user = response.optJSONObject("user");
