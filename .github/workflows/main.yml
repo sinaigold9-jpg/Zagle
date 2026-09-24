@@ -25,11 +25,19 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Make Gradle Wrapper executable
+      - name: Install Android SDK 34
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-34"
+
+      - name: Prepare Gradle Wrapper
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build APK with compileSdk 34
+        run: |
+          sed -i 's/compileSdk[[:space:]]*=[[:space:]]*33/compileSdk = 34/g' app/build.gradle
+          sed -i 's/compileSdk[[:space:]]*33/compileSdk 34/g' app/build.gradle
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
