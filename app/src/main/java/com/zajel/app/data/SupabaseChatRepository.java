@@ -34,7 +34,7 @@ public final class SupabaseChatRepository implements ChatRepository {
         this.mediaStorage = mediaStorage;
     }
 
-    @Override public void conversations(String id, Callback<List<Conversation>> cb) {
+    @Override public void conversations(Callback<List<Conversation>> cb) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 UserSession u = required();
